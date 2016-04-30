@@ -7,6 +7,7 @@ using System.Net.Http;
 using HtmlAgilityPack;
 using static Newtonsoft.Json.JsonConvert;
 using static System.Console;
+using System.Diagnostics;
 
 namespace MsftLibaryCrawler
 {
@@ -14,7 +15,8 @@ namespace MsftLibaryCrawler
     {
         static void Main(string[] args)
         {
-            var startUrl = "https://msdn.microsoft.com/en-us/library/aa338032(v=vs.60).aspx";
+            // e.g. 列出所有 VB6 參考的 Method 
+            var startUrl = "https://msdn.microsoft.com/en-us/library/aa338105(v=vs.60).aspx";
             StartAsync(startUrl);
 
             Read();
@@ -22,6 +24,9 @@ namespace MsftLibaryCrawler
 
         static async Task StartAsync(string url)
         {
+            if (url == null)
+                return;
+
             var tocUrl = url + "?toc=1";
             var client = new HttpClient();
             var json = await client.GetStringAsync(tocUrl);
@@ -32,9 +37,16 @@ namespace MsftLibaryCrawler
 
             foreach (var subItem in subItems)
             {
-                WriteLine($"{subItem.Title}: {subItem.Href}");
+                Print(subItem);
+
                 await StartAsync(subItem.Href);
             }
+        }
+
+        static void Print(SubItem subItem)
+        {
+            WriteLine($"{subItem.Title}: {subItem.Href}");
+            Debug.WriteLine(subItem.Title);
         }
 
         //var hd = new HtmlDocument();
